@@ -60,8 +60,8 @@ jobs:
           context: .
           platforms: linux/arm64
           tags: |
-            ghcr.io/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository }}:${{ github.sha }}
+            ghcr.io/${{ github.repository }}:latest-arm64
+            ghcr.io/${{ github.repository }}:${{ github.sha }}-arm64
           push: true
 
   # Merge job is disabled since we're only building ARM64 for now
