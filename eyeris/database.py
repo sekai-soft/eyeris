@@ -1,0 +1,64 @@
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, Session
+from contextlib import contextmanager
+import os
+
+# Database URL - required environment variable
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL environment variable is required")
+
+# Create engine
+engine = create_engine(DATABASE_URL)
+
+# Create session factory
+SessionLocal = sessionmaker(bind=engine)
+
+
+def get_db() -> Session:
+    """
+    Dependency function for FastAPI to get database session.
+
+    Usage:
+        @app.get("/endpoint")
+        def endpoint(db: Session = Depends(get_db)):
+            # Use db session
+            pass
+    """
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+@contextmanager
+def get_db_context():
+    """
+    Context manager for database session.
+
+    Usage:
+        with get_db_context() as db:
+            # Use db session
+            pass
+    """
+    db = SessionLocal()
+    try:
+        yield db
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        db.close()
+
+
+def init_db():
+    """
+    Initialize the database by creating all tables.
+
+    IMPORTANT: This requires the pgvector extension to be enabled in PostgreSQL.
+    Run this SQL command first: CREATE EXTENSION IF NOT EXISTS vector;
+    """
+    from eyeris.db_models import Base
+    Base.metadata.create_all(bind=engine)

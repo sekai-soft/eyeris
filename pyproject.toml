@@ -5,4 +5,7 @@ description = "Simple media recommendation engine"
 requires-python = ">=3.13"
 dependencies = [
     "fastapi[standard]>=0.121.0",
+    "sqlalchemy>=2.0.25",
+    "psycopg2-binary>=2.9.9",
+    "pgvector>=0.2.4",
 ]
