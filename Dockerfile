@@ -19,11 +19,10 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 # For AMD64: Replace with CPU-only PyTorch to avoid CUDA bloat
 # For ARM64: PyPI already provides CPU-only, so this will be a no-op
-RUN .venv/bin/pip uninstall -y torch torchvision && \
- .venv/bin/pip install torch torchvision \
+RUN uv pip uninstall -y torch torchvision && \
+ uv pip install torch torchvision \
  --index-url https://download.pytorch.org/whl/cpu \
- --extra-index-url https://pypi.org/simple \
- --no-cache-dir
+ --extra-index-url https://pypi.org/simple
 
 # Then, use a final image without uv
 FROM python:3.13-slim-bookworm
