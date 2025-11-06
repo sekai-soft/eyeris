@@ -1,12 +1,24 @@
 from fastapi import FastAPI, HTTPException
+from contextlib import asynccontextmanager
 
 from eyeris.models import ProfileIngestionRequest, ProfileIngestionResponse
-from eyeris.embeddings import compute_embeddings_from_images, store_profile_embeddings
+from eyeris.embeddings import compute_embeddings_from_images, store_profile_embeddings, warmup_model
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Lifespan event handler - runs on startup and shutdown."""
+    # Startup: Pre-load the ResNet-50 model
+    warmup_model()
+    yield
+    # Shutdown: cleanup if needed
+
 
 app = FastAPI(
     title="Eyeris",
     description="Simple media recommendation engine",
-    version="0.1.0"
+    version="0.1.0",
+    lifespan=lifespan
 )
 
 
