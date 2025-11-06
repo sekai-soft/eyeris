@@ -14,3 +14,13 @@ dependencies = [
     "httpx>=0.25.0",
     "certifi>=2023.0.0",
 ]
+
+[tool.uv.sources]
+# Only torch needs the CPU index - torchvision will automatically be CPU-only
+# when paired with CPU-only torch, and PyPI has better platform support
+torch = { index = "pytorch-cpu" }
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
