@@ -92,3 +92,20 @@ jobs:
   #         docker buildx imagetools create -t ghcr.io/${{ github.repository }}:${{ github.sha }} \
   #           ghcr.io/${{ github.repository }}:${{ github.sha }}-amd64 \
   #           ghcr.io/${{ github.repository }}:${{ github.sha }}-arm64
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-arm
+    steps:
+      - name: Setup Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ops
+      - name: Pull and restart container
+        run: |
+          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "nixos@gibraltar" \
+             "sed -i 's|ghcr.io/sekai-soft/eyeris:latest|ghcr.io/sekai-soft/eyeris:${{ github.sha }}|g' /home/nixos/galerie/compose.yaml && \
+             docker compose -f /home/nixos/galerie/compose.yaml pull eyeris && \
+             docker compose -f /home/nixos/galerie/compose.yaml up -d"
