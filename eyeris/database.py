@@ -57,8 +57,15 @@ def init_db():
     """
     Initialize the database by creating all tables.
 
-    IMPORTANT: This requires the pgvector extension to be enabled in PostgreSQL.
-    Run this SQL command first: CREATE EXTENSION IF NOT EXISTS vector;
+    This will automatically enable the pgvector extension if not already enabled.
     """
     from eyeris.db_models import Base
+    from sqlalchemy import text
+
+    # Enable pgvector extension
+    with engine.connect() as conn:
+        conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
+        conn.commit()
+
+    # Create all tables
     Base.metadata.create_all(bind=engine)

@@ -1,3 +1,8 @@
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
 from fastapi import FastAPI, HTTPException
 from contextlib import asynccontextmanager
 
@@ -6,9 +11,11 @@ from eyeris.embeddings import compute_embeddings_from_images, store_profile_embe
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_: FastAPI):
     """Lifespan event handler - runs on startup and shutdown."""
-    # Startup: Pre-load the ResNet-50 model
+    # Startup: Initialize database and pre-load the ResNet-50 model
+    from eyeris.database import init_db
+    init_db()
     warmup_model()
     yield
     # Shutdown: cleanup if needed
@@ -33,7 +40,11 @@ async def ingest_profile_media(profile_id: str, request: ProfileIngestionRequest
     Ingest media for a profile and compute/store embeddings.
 
     This endpoint accepts a list of image URLs, processes them to extract embeddings,
-    and stores them for the profile.
+    and stores them for the profile. If the profile doesn't exist, it will be created.
+
+    Args:
+        profile_id: User-defined identifier for the profile (e.g., "john_doe", "user123")
+        request: Request body containing image_urls
     """
     try:
         embeddings = await compute_embeddings_from_images(request.image_urls)

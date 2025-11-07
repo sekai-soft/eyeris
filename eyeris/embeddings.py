@@ -94,12 +94,31 @@ async def store_profile_embeddings(profile_id: str, embeddings_with_urls: List[T
     """
     Store new embeddings for a profile.
 
-    TODO: Implement storage logic to persist embeddings to database/storage.
-    This will store all individual embeddings for the profile, not merge them.
+    If the profile doesn't exist, it will be created first.
+    Then all embeddings with their associated image URLs will be stored.
 
     Args:
-        profile_id: Unique identifier for the profile
+        profile_id: User-facing identifier for the profile (e.g., "john_doe", "user123")
         embeddings_with_urls: List of tuples (image_url, embedding_vector) to store
     """
-    # Placeholder: Add storage implementation here
-    pass
+    from eyeris.database import get_db_context
+    from eyeris.db_models import Profile, Embedding
+
+    with get_db_context() as db:
+        # Check if profile exists by profile_id
+        profile = db.query(Profile).filter(Profile.profile_id == profile_id).first()
+
+        # If profile doesn't exist, create it
+        if not profile:
+            profile = Profile(profile_id=profile_id)
+            db.add(profile)
+            db.flush()  # Ensure profile is persisted before adding embeddings
+
+        # Add all embeddings
+        for image_url, embedding_vector in embeddings_with_urls:
+            embedding = Embedding(
+                profile_uuid=profile.uuid,
+                image_url=image_url,
+                embedding_vector=embedding_vector
+            )
+            db.add(embedding)
