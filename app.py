@@ -1,7 +1,6 @@
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
-load_dotenv()
+load_dotenv('.nonsecret.env')
 
 from fastapi import FastAPI, HTTPException
 from contextlib import asynccontextmanager
