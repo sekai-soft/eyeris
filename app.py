@@ -1,12 +1,15 @@
+import os
 from dotenv import load_dotenv
-
-load_dotenv('.nonsecret.env')
 
 from fastapi import FastAPI, HTTPException
 from contextlib import asynccontextmanager
 
 from eyeris.models import ProfileIngestionRequest, ProfileIngestionResponse
 from eyeris.embeddings import compute_embeddings_from_images, store_profile_embeddings, warmup_model
+
+
+if os.path.exists('.dev.env'):
+    load_dotenv('.dev.env')
 
 
 @asynccontextmanager
